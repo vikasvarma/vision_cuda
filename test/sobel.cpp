@@ -10,6 +10,6 @@ int main()
     Image rgb(lenna);
     Image gray(rgb.W, rgb.H, 1);
     rgb2gray(rgb, gray);
-    gray.write("gray.png");
+    gray.write("C:\\Projects\\cuda\\edge\\data\\gray.png");
     return 0;
 }

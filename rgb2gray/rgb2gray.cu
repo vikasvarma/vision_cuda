@@ -16,22 +16,22 @@ static void HandleError(cudaError_t err, const char *file, int line)
 #define TILE_H 16
 
 /*******************************************************************************
- * @brief rgb2gray_kernel - CUDA kernel for converting RGB images to grayscale.
+ * @brief rgb2gray_cuda - CUDA kernel for converting RGB images to grayscale.
  */
-__global__ void rgb2gray_kernel(uint8_t *rgb, uint8_t *gray, int W, int H)
+__global__ void rgb2gray_cuda(uint8_t *rgb, uint8_t *gray, int W, int H)
 {
     // Get thread id wrt the entire image:
     int x = threadIdx.x + blockIdx.x * blockDim.x;
     int y = threadIdx.y + blockIdx.y * blockDim.y;
 
-    if ((x >= 0) && (y >= 0) && (x < W) && (y < H))
-    {
+    //if ((x >= 0) && (y >= 0) && (x < W) && (y < H))
+    //{
         auto p_r = rgb[y * W + x * 3 + 0];
         auto p_g = rgb[y * W + x * 3 + 1];
         auto p_b = rgb[y * W + x * 3 + 2];
 
         gray[y * W + x] = 0.30 * p_r + 0.59 * p_g + 0.11 * p_b;
-    }
+    //}
 }
 
 /*******************************************************************************
@@ -45,8 +45,8 @@ __host__ void rgb2gray(Image &rgb, Image &gray)
 
     // Allocate memory for device buffers:
     uint8_t *d_in, *d_out;
-    HANDLE_ERROR(cudaMalloc((void **)d_in, rgb.bytes));
-    HANDLE_ERROR(cudaMalloc((void **)d_out, gray.bytes));
+    HANDLE_ERROR(cudaMalloc((void **)&d_in, rgb.bytes));
+    HANDLE_ERROR(cudaMalloc((void **)&d_out, gray.bytes));
 
     // Copy data to the device buffers:
     HANDLE_ERROR(cudaMemcpy(d_in, rgb.data, rgb.bytes, cudaMemcpyHostToDevice));
@@ -58,7 +58,7 @@ __host__ void rgb2gray(Image &rgb, Image &gray)
     dim3 blocks(blockx, blocky);
 
     // Process on the GPU
-    rgb2gray_kernel<<<blocks, threads>>>(d_in, d_out, gray.W, gray.H);
+    rgb2gray_cuda<<<blocks, threads>>>(d_in, d_out, gray.W, gray.H);
 
     // Copy grayscale image back to host:
     HANDLE_ERROR(cudaMemcpy(gray.data, d_out, gray.bytes, cudaMemcpyDeviceToHost));

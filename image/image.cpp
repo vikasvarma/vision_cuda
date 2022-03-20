@@ -61,11 +61,10 @@ static map<string, ImageType> const typemap{
 Image::Image(const char *filename)
 {
     // Read the image:
-    uint8_t *buffer;
-    buffer = stbi_load(filename, &W, &H, &C, 0);
+    data = stbi_load(filename, &W, &H, &C, 0);
     bytes = W * H * C;
 
-    if (buffer == NULL)
+    if (data == NULL)
     {
         throw(ImageException(READ_FAILURE));
     }
